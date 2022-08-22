@@ -34,7 +34,6 @@ class FespiderSpider(scrapy.Spider):
                     cel = f'=HYPERLINK("{link}","{a}")' 
                 else:
                     cel = col.xpath('text()').get()
-                    print('antes',f'{index=}',cel)
                     if cel:
                         cel = cel.replace('R$ ','')
                         cel = cel.replace('N/A','')
@@ -42,12 +41,12 @@ class FespiderSpider(scrapy.Spider):
                         cel = cel.replace(',','.')
                         cel = cel.replace('%','').strip()
                         cel = tofloat(cel)
+                        if index == 3 and tofloat(cel):
+                            cel = cel / 10
+
                 #print(type(cel), cel)
                 dataset[collumn_names[index]].append(cel)
             #break
-
-        #Corrigindo valor Liquidez Diária
-        dataset['Liquidez Diária'] = [*map(lambda n: n / 10, dataset['Liquidez Diária'])]
 
         df = pd.DataFrame(dataset)
         print(df.info())
@@ -55,9 +54,5 @@ class FespiderSpider(scrapy.Spider):
             "data.xlsx",
             engine='xlsxwriter'
         ) as writer:
-            df.to_excel(writer) 
-    
+            df.to_excel(writer)
             
-#//*[@id="table-ranking"]/thead/tr/th[1]
-        #print('\n\n----------------\n', collumn_names.getall(), '\n----------------\n',len(collumn_names.getall()),'\n',)
-
